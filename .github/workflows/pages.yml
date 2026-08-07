@@ -26,7 +26,12 @@ jobs:
 
       # No build step: the site is the repository. pdf.js and pdf-lib are
       # vendored, so there is nothing to install or bundle.
+      # enablement: true turns Pages on (source: GitHub Actions) the first time
+      # this runs, instead of failing with "Get Pages site failed" on a repo
+      # where Pages has never been switched on by hand.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
