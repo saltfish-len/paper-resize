@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>paper-resize — A4 ⇄ Letter without shrinking your document</title>
+<meta name="description" content="Convert a PDF between paper sizes in your browser, keeping content at true 100% whenever it fits.">
+<link rel="stylesheet" href="./styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>📐</text></svg>">
+</head>
+<body>
+
+<header>
+  <h1>paper-resize</h1>
+  <p class="tagline">
+    Re-paper a PDF between A4, Letter and friends — at <strong>true 100%</strong> wherever the ink
+    actually fits, and never by more than it has to where it doesn't.
+  </p>
+  <p class="privacy">
+    Everything runs inside this tab. Your file is never uploaded — this page is static, it has
+    nowhere to upload it to.
+  </p>
+</header>
+
+<main>
+
+  <section id="drop" class="drop" tabindex="0" role="button" aria-label="Choose a PDF">
+    <div class="dropinner">
+      <div class="dropicon">📄</div>
+      <div><strong>Drop a PDF here</strong> or click to choose</div>
+    </div>
+    <input type="file" id="file" accept="application/pdf,.pdf" hidden>
+  </section>
+
+  <p id="status" class="status"></p>
+
+  <section id="panel" hidden>
+
+    <div class="controls">
+      <label>
+        <span>Target paper</span>
+        <select id="target"></select>
+      </label>
+
+      <label>
+        <span>Placement</span>
+        <select id="anchor">
+          <option value="proportional" selected>Proportional — keep the margin ratio</option>
+          <option value="center">Centred</option>
+          <option value="edge">Keep top &amp; left margins exactly</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Safety inset
+          <em title="Most printers cannot print within a few millimetres of the paper edge, and many drivers silently shrink the page to compensate. Insetting here keeps that from happening.">?</em>
+        </span>
+        <span class="withunit"><input type="number" id="margin" value="0" min="0" max="20" step="0.5"><i>mm</i></span>
+      </label>
+
+      <label>
+        <span>Speck filter
+          <em title="Ignore rows and columns holding less ink than this. Useful for scans with dust and edge noise; leave off for born-digital files.">?</em>
+        </span>
+        <select id="denoise">
+          <option value="0" selected>Off — any ink counts</option>
+          <option value="0.0005">Light (0.05%)</option>
+          <option value="0.002">Heavy (0.2%) — scans</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Measure at</span>
+        <select id="dpi">
+          <option value="96">96 dpi — fastest</option>
+          <option value="144" selected>144 dpi — 0.5 pt precision</option>
+          <option value="216">216 dpi — most precise</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Full-bleed pages</span>
+        <select id="fullBleed">
+          <option value="fit" selected>Fit — leave a white border</option>
+          <option value="fill">Fill — crop the bleed</option>
+        </select>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" id="globalScale" checked>
+        <span>One scale for the whole document
+          <em title="Deciding page by page makes body text change size between pages. Off means each page gets the largest factor it can individually.">?</em>
+        </span>
+      </label>
+    </div>
+
+    <div id="summary" class="summary"></div>
+    <div id="warnings"></div>
+
+    <div class="printwarning">
+      <strong>When you print this:</strong> choose <em>Actual size</em> / <em>100%</em> in the print
+      dialog. If you leave it on <em>Fit to page</em> the driver will scale the document anyway and
+      everything this tool did is thrown away.
+    </div>
+
+    <div class="actions">
+      <button id="build" class="primary" disabled>Build the PDF</button>
+      <button id="reset">Start over</button>
+    </div>
+
+    <div id="rows" class="rows"></div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    Ink extents are measured by rasterising each page and scanning pixels, so white-on-white
+    rectangles, invisible OCR text layers and clipped content don't count as content.
+    Annotations, links, form fields and bookmark destinations are carried through the same
+    transform rather than dropped.
+  </p>
+  <p class="colophon">
+    Built on <a href="https://mozilla.github.io/pdf.js/">pdf.js</a> and
+    <a href="https://pdf-lib.js.org/">pdf-lib</a>, both vendored — no CDN, no network calls.
+    <a href="https://github.com/saltfish-len/paper-resize">Source</a>.
+  </p>
+</footer>
+
+<script src="./vendor/pdf-lib.min.js"></script>
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>
